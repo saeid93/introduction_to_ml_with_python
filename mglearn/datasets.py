@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import os
 from scipy import signal
-from sklearn.datasets import load_boston
+# from sklearn.datasets import load_boston
 from sklearn.preprocessing import MinMaxScaler, PolynomialFeatures
 from sklearn.datasets import make_blobs
 
@@ -13,7 +13,7 @@ def make_forge():
     # a carefully hand-designed dataset lol
     X, y = make_blobs(centers=2, random_state=4, n_samples=30)
     y[np.array([7, 27])] = 0
-    mask = np.ones(len(X), dtype=np.bool)
+    mask = np.ones(len(X), dtype=bool)
     mask[np.array([0, 1, 5, 26])] = 0
     X, y = X[mask], y[mask]
     return X, y
@@ -28,13 +28,24 @@ def make_wave(n_samples=100):
 
 
 def load_extended_boston():
-    boston = load_boston()
-    X = boston.data
 
-    X = MinMaxScaler().fit_transform(boston.data)
+    import pandas as pd
+    import numpy as np
+
+    data_url = "http://lib.stat.cmu.edu/datasets/boston"
+    raw_df = pd.read_csv(data_url, sep="\s+", skiprows=22, header=None)
+    data = np.hstack([raw_df.values[::2, :], raw_df.values[1::2, :2]])
+    target = raw_df.values[1::2, 2]
+
+    # boston = load_boston()
+    # X = boston.data
+    X = data
+
+    # X = MinMaxScaler().fit_transform(boston.data)
+    X = MinMaxScaler().fit_transform(data)
     X = PolynomialFeatures(degree=2, include_bias=False).fit_transform(X)
-    return X, boston.target
-
+    # return X, boston.target
+    return X, target
 
 def load_citibike():
     data_mine = pd.read_csv(os.path.join(DATA_PATH, "citibike.csv"))
